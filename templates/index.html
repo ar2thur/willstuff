@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div id="login-container">
+        <h1>Welcome to the Chat Room</h1>
+        <label for="username">Enter your name:</label>
+        <input type="text" id="username" placeholder="Enter your name">
+        <button onclick="joinChat()">Join</button>
+    </div>
+    <div id="chat-container" style="display: none;">
+        <h1>Chat Room</h1>
+        <div id="chat-messages"></div>
+        <input type="text" id="chat-input" placeholder="Type your message here">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        var socket = io.connect(window.location.protocol + '//' + window.location.host);
+
+        function joinChat() {
+            var usernameInput = document.getElementById('username');
+            var username = usernameInput.value;
+            if (username.trim() !== '') {
+                socket.emit('join', username);
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('chat-container').style.display = 'block';
+            } else {
+                alert('Please enter a username to join the chat room.');
+            }
+        }
+
+        socket.on('connect', function() {
+            console.log('Connected to the server');
+        });
+
+        socket.on('message', function(data) {
+            var chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML += '<p>' + data + '</p>';
+        });
+
+        function sendMessage() {
+            var chatInput = document.getElementById('chat-input');
+            var message = chatInput.value;
+            socket.emit('message', message);
+            chatInput.value = '';
+        }
+    </script>
+</body>
+</html>
